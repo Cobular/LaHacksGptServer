@@ -1,12 +1,15 @@
 import os
 from flask import Flask, request
 from werkzeug.local import LocalProxy
+from flask import g
 
 from flask import g
 import openai
 from aiohttp import ClientSession
 
 from dotenv import load_dotenv
+
+from db_manager import DbManager
 
 load_dotenv()
 
@@ -20,9 +23,41 @@ Your prompt is as follows:"""
 
 app = Flask(__name__)
 
+def get_db() -> DbManager:
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = DbManager()
+        db.create_tables()
 
-@app.route("/", methods=["GET"])
-async def get_completion():
+    return db
+
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        del db
+
+
+# Create an API user
+@app.route("/user", methods=["POST"])
+async def create_user():
+    try:
+        uuid = get_db().insert_user()
+        return {"success": True, "uuid": uuid}, 200
+    except Exception as e:
+        return {"success": False, "error": str(e)}, 500
+
+# Get the cost of a user
+@app.route("/user/<uuid>", methods=["GET"])
+async def get_user(uuid: str):
+    user = get_db().get_user(uuid)
+    if user is None:
+        return {"success": False, "error": "User does not exist"}, 400
+    return {"success": True, "uuid": user.uuid, "cost": user.cost}, 200
+
+# Get a completion for a user
+@app.route("/completion/<uuid>", methods=["GET"])
+async def get_completion(uuid: str):
     args = request.args
 
     query = args.get("query")
@@ -39,6 +74,12 @@ async def get_completion():
             "success": False,
             "error": "You can only request up to 5 ideas at a time",
         }, 400
+    
+    if not get_db().user_exists(uuid):
+        return {
+            "success": False,
+            "error": "User does not exist",
+        }, 400
 
     prompt = BASE_PROMPT.format(num=num)
 
@@ -53,6 +94,8 @@ async def get_completion():
 
     cost = (response["usage"]["total_tokens"] / 1000) * 0.002
 
+    db_manager.add_cost(uuid, cost)
+    
     if message == "I don't know what to say":
         return {
             "success": False,
