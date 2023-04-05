@@ -1,3 +1,13 @@
 {
-  "python.formatting.provider": "black"
+  "python.formatting.provider": "black",
+  "thunder-client.saveToWorkspace": true,
+  "sqltools.useNodeRuntime": true,
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "driver": "SQLite",
+      "name": "test",
+      "database": "${workspaceFolder:Gpt35Server}/instance/lahacks_db.sqlite"
+    }
+  ]
 }

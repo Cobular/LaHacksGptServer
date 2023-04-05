@@ -1,0 +1,50 @@
+[
+  {
+    "_id": "93400493-47e5-42af-9c20-86e5d0a3378e",
+    "colId": "history",
+    "containerId": "",
+    "name": "Create User",
+    "url": "http://127.0.0.1:5000/user",
+    "method": "POST",
+    "sortNum": 0,
+    "created": "2023-04-05T01:55:58.424Z",
+    "modified": "2023-04-05T01:55:58.424Z",
+    "headers": [],
+    "params": [],
+    "tests": []
+  },
+  {
+    "_id": "85a8d6f9-e6ef-4afd-b8d3-929345128b22",
+    "colId": "history",
+    "containerId": "",
+    "name": "Get User",
+    "url": "http://127.0.0.1:5000/user/2ffd66aa-159d-48f2-94c5-5eef23d9e4fb",
+    "method": "GET",
+    "sortNum": 0,
+    "created": "2023-04-05T02:02:15.876Z",
+    "modified": "2023-04-05T02:02:15.876Z",
+    "headers": [],
+    "params": [],
+    "tests": []
+  },
+  {
+    "_id": "946d7a1b-562c-4161-97ea-abe497bff10c",
+    "colId": "history",
+    "containerId": "",
+    "name": "http://127.0.0.1:5000/completion/2ffd66aa-159d-48f2-94c5-5eef23d9e4fb?query=dog names",
+    "url": "http://127.0.0.1:5000/completion/2ffd66aa-159d-48f2-94c5-5eef23d9e4fb?query=dog names",
+    "method": "GET",
+    "sortNum": 0,
+    "created": "2023-04-05T02:02:59.950Z",
+    "modified": "2023-04-05T02:02:59.950Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "query",
+        "value": "dog names",
+        "isPath": false
+      }
+    ],
+    "tests": []
+  }
+]

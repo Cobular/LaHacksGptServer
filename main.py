@@ -1,125 +1,51 @@
 import os
-from flask import Flask, request
-from werkzeug.local import LocalProxy
+from flask import Flask
 from flask import g
-
-from flask import g
-import openai
-from aiohttp import ClientSession
 
 from dotenv import load_dotenv
 
-from db_manager import DbManager
+from database.db_setup import init_app
+from pages.ui import ui
+from pages.errors import register_error_handlers
+from pages.completions import completion
+from pages.users import user
+from utils import list_routes
 
 load_dotenv()
 
 
-BASE_PROMPT = """You are a helpful assistant who comes up with short, one line ideas for the user.
-You will come up with {num:d} ideas that you think the user would like. Seperate your ideas with a single newline between each. 
-Do not wrap the ideas in quotes. Ensure each idea is only one line long. 
-If a user asks for ideas that are too long to fit on a single line, you should say "I don't know what to say" instead of responding with an idea.
-Your prompt is as follows:"""
-
-
-app = Flask(__name__)
-
-def get_db() -> DbManager:
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = DbManager()
-        db.create_tables()
-
-    return db
-
-@app.teardown_appcontext
-def close_connection(exception):
-    db = getattr(g, '_database', None)
-    if db is not None:
-        del db
-
-
-# Create an API user
-@app.route("/user", methods=["POST"])
-async def create_user():
-    try:
-        uuid = get_db().insert_user()
-        return {"success": True, "uuid": uuid}, 200
-    except Exception as e:
-        return {"success": False, "error": str(e)}, 500
-
-# Get the cost of a user
-@app.route("/user/<uuid>", methods=["GET"])
-async def get_user(uuid: str):
-    user = get_db().get_user(uuid)
-    if user is None:
-        return {"success": False, "error": "User does not exist"}, 400
-    return {"success": True, "uuid": user.uuid, "cost": user.cost}, 200
-
-# Get a completion for a user
-@app.route("/completion/<uuid>", methods=["GET"])
-async def get_completion(uuid: str):
-    args = request.args
-
-    query = args.get("query")
-    num = args.get("num", 5)
-
-    if query is None:
-        return {
-            "success": False,
-            "error": "Please provide a query as the query parameter `query`",
-        }, 400
-
-    if num > 5:
-        return {
-            "success": False,
-            "error": "You can only request up to 5 ideas at a time",
-        }, 400
-    
-    if not get_db().user_exists(uuid):
-        return {
-            "success": False,
-            "error": "User does not exist",
-        }, 400
-
-    prompt = BASE_PROMPT.format(num=num)
-
-    response = await openai.ChatCompletion.acreate(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": prompt},
-            {"role": "user", "content": query},
-        ],
+def create_app(test_config=None):
+    # create and configure the app
+    app = Flask(__name__, instance_relative_config=True)
+    app.config.from_mapping(
+        SECRET_KEY='dev',
+        DATABASE=os.path.join(app.instance_path, 'lahacks_db.sqlite'),
+        SERVER_NAME=os.getenv("SERVER_NAME", "127.0.0.1:5000"),
     )
-    message = response.choices[0].message["content"]
 
-    cost = (response["usage"]["total_tokens"] / 1000) * 0.002
+    if test_config is None:
+        # load the instance config, if it exists, when not testing
+        app.config.from_pyfile('config.py', silent=True)
+    else:
+        # load the test config if passed in
+        app.config.from_mapping(test_config)
 
-    db_manager.add_cost(uuid, cost)
-    
-    if message == "I don't know what to say":
-        return {
-            "success": False,
-            "cost": cost,
-            "error": "Generation failed to be correct. Please try again, revising your prompt. Ensure you ask for 5 or fewer ideas and that a response can fit on a single line.",
-        }, 400
+    # ensure the instance folder exists
+    try:
+        os.makedirs(app.instance_path)
+    except OSError:
+        pass
 
-    # Parse the data we want from the response
-    ideas = message.split("\n")
-    # This is really stupid, but the model will always return the data with either prefixed
-    # numbers or dashes. We need to strip those off.
-    if ideas[0].startswith("- "):
-        ideas = [idea[2:] for idea in ideas]
-    elif ideas[0].startswith("1. "):
-        ideas = [idea[3:] for idea in ideas]
+    init_app(app)
+    register_error_handlers(app)
 
-    # Remove any empty strings
-    ideas = [idea for idea in ideas if idea != ""]
+    app.register_blueprint(completion)
+    app.register_blueprint(user)
+    app.register_blueprint(ui)
 
-    if len(ideas) > num:
-        return {
-            "success": False,
-            "cost": cost,
-            "error": "Generation failed to be correct, generated too long of a response. Please try again, revising your prompt. Ensure you ask for 5 or fewer ideas and that a response can fit on a single line.",
-        }, 400
+    with app.app_context():
+        list_routes(app)
 
-    return {"success": True, "completion": ideas, "cost": cost}
+    return app
+
+
