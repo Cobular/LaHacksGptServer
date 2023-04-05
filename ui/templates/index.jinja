@@ -1,0 +1,30 @@
+{% extends "layout.jinja" %}
+
+{% block title %}GptAPI{% endblock %}
+
+{% block content %}
+<h1 class="text-6xl font-bold self-center">GPT API</h1>
+<div class="divide-y-2">
+  <div class="py-2">
+    <!-- Create a User -->
+    <form action="/user" method="get" class="flex flex-col self-center gap-2">
+      <input type="text" name="secret" placeholder="Secret Key" required class="rounded py-2 px-4" />
+      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" type="submit">
+        Create a User
+      </button>
+    </form>
+  </div>
+  <div class="py-2">
+    <!-- Goto page for existing user -->
+    <form action="/user" method="get" class="flex flex-col self-center gap-2">
+      <div class="flex flex-row gap-2">
+        <input type="text" name="secret" placeholder="Secret Key" required class="rounded py-2 px-4" />
+        <input type="text" name="uuid" placeholder="User ID" required class="rounded py-2 px-4" />
+      </div>
+      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" type="submit">
+        View User Stats
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

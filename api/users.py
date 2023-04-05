@@ -5,7 +5,7 @@ from sqlite3 import Error as SqliteError
 
 from database.db_setup import get_db
 
-user = Blueprint("api/user", __name__)
+user = Blueprint("user", __name__)
 
 
 @user.route("/user", methods=["POST"])
@@ -15,8 +15,8 @@ async def create_user():
     Returns:
         Response: The UUID of the user, or an error
     """
-    uuid = get_db().insert_user()
-    return {"success": True, "uuid": uuid}, 200
+    uuid, cost = get_db().insert_user()
+    return {"success": True, "uuid": uuid, "cost": cost}, 200
 
 
 

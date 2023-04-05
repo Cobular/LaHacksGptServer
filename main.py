@@ -3,12 +3,10 @@ from flask import Flask
 from flask import g
 
 from dotenv import load_dotenv
+from api import api
 
 from database.db_setup import init_app
-from pages.ui import ui
-from pages.errors import register_error_handlers
-from pages.completions import completion
-from pages.users import user
+from ui import ui
 from utils import list_routes
 
 load_dotenv()
@@ -37,10 +35,8 @@ def create_app(test_config=None):
         pass
 
     init_app(app)
-    register_error_handlers(app)
 
-    app.register_blueprint(completion)
-    app.register_blueprint(user)
+    app.register_blueprint(api)
     app.register_blueprint(ui)
 
     with app.app_context():

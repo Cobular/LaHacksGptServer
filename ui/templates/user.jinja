@@ -1,0 +1,39 @@
+{% extends "layout.jinja" %}
+
+{% block title %}Create User - GptAPI{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('ui.index') }}" class="self-center underline">
+  <h1 class="text-6xl font-bold">GPT API</h1>
+</a>
+<div>
+  <p class="text-center">Your API Key:</p>
+  <p id="userid" class="font-mono cursor-pointer">{{ user_id }}</p>
+  <p>You've spent {{ "$%.4f"|format(cost) }} of my hard-earned money!</p>
+
+  <div class="pt-6">
+    <h2 class="text-2xl font-bold mx-auto  pb-2">Test Generate Ideas</h2>
+    <form action="/user" method="get" class="flex flex-row self-center gap-1">
+      <input type="text" name="uuid" value="{{ user_id }}" required class="hidden" />
+      <input type="text" name="secret" value="{{ secret }}" required class="hidden" />
+      <input type="text" name="query" placeholder="Query" required class="rounded py-2 px-4 grow" />
+      <input type="number" name="num" placeholder="Num" min=1 max=5 class="rounded py-2 px-4 min-w-[6rem]" />
+      <input type="submit" style="display: none" />
+    </form>
+    {% if ideas is not none %}
+    <ul class="list-disc list-inside p-3">
+      {% for idea in ideas %}
+      <li>{{ idea }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</div>
+<script>
+  $("#userid").click(function () {
+    const contents = $(this).text();
+    navigator.clipboard.writeText(contents)
+    console.log(contents)
+  });
+</script>
+{% endblock %}

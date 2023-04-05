@@ -31,12 +31,12 @@
     "_id": "946d7a1b-562c-4161-97ea-abe497bff10c",
     "colId": "history",
     "containerId": "",
-    "name": "http://127.0.0.1:5000/completion/2ffd66aa-159d-48f2-94c5-5eef23d9e4fb?query=dog names",
-    "url": "http://127.0.0.1:5000/completion/2ffd66aa-159d-48f2-94c5-5eef23d9e4fb?query=dog names",
+    "name": "Get Completion",
+    "url": "http://127.0.0.1:5000/api/completion/a852b17a-6b44-42f7-b835-c5b235943790?query=dog names",
     "method": "GET",
     "sortNum": 0,
     "created": "2023-04-05T02:02:59.950Z",
-    "modified": "2023-04-05T02:02:59.950Z",
+    "modified": "2023-04-05T03:14:28.485Z",
     "headers": [],
     "params": [
       {

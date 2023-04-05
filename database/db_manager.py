@@ -1,5 +1,5 @@
 import sqlite3
-from typing import NamedTuple
+from typing import NamedTuple, Tuple
 from uuid import uuid4
 
 
@@ -21,7 +21,7 @@ class DbManager:
         self.conn = sqlite3.connect(db_file, check_same_thread=False, **kwargs)
         self.conn.row_factory = sqlite3.Row
 
-    def insert_user(self, uuid=None, cost=0) -> str:
+    def insert_user(self, uuid=None, cost=0) -> Tuple[str, float]:
         """Add a new user to the database
 
         Args:
@@ -38,7 +38,7 @@ class DbManager:
             {"uuid": uuid, "cost": cost},
         )
         self.conn.commit()
-        return uuid
+        return uuid, cost
 
     def get_user(self, uuid: str) -> dict | None:
         """Get a user from the database

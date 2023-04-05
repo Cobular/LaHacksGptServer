@@ -5,7 +5,7 @@ from database.db_setup import get_db
 from logic.completions import make_completion
 
 
-completion = Blueprint("api/completion", __name__)
+completion = Blueprint("completion", __name__)
 
 
 @completion.route("/completion/<uuid>", methods=["GET"])
@@ -41,7 +41,7 @@ async def get_completion(uuid: str):
             "error": "User does not exist",
         }, 400
 
-    ideas, cost = make_completion(query, num, uuid)
+    ideas, cost = await make_completion(query, num, uuid)
 
     get_db().add_cost(uuid, cost)
 
