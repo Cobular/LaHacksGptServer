@@ -1,6 +1,9 @@
 # pull official base image
-FROM python:3.10.10-slim-buster
+FROM python:3.10.10-alpine
 
+
+RUN adduser -D worker
+USER worker
 # set work directory
 WORKDIR /usr/src/app
 
@@ -9,12 +12,13 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # install dependencies
+ENV PATH="/home/worker/.local/bin:${PATH}"
 RUN pip install --upgrade pip
-COPY ./requirements.txt /usr/src/app/requirements.txt
+COPY --chown=worker:worker ./requirements.txt /usr/src/app/requirements.txt
 RUN pip install -r requirements.txt
 
 # copy project
-COPY . /usr/src/app/
+COPY --chown=worker:worker . /usr/src/app/
 
 EXPOSE 8000
 
