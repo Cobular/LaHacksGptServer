@@ -4,8 +4,11 @@ services:
   web:
     build: .
     volumes:
-      - ./instance/:/usr/src/app/instance
+      - instance:/usr/src/app/instance
     ports:
       - 8000:8000
     env_file:
       - ./.env
+
+volumes:
+  instance:
