@@ -23,6 +23,8 @@ async def get_completion(uuid: str):
     query = args.get("query")
     num = args.get("num", 5)
 
+    num = int(num)
+
     if query is None:
         return {
             "success": False,
